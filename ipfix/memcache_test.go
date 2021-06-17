@@ -60,6 +60,7 @@ func TestMemCacheInsert(t *testing.T) {
 }
 
 func TestMemCacheAllSetIds(t *testing.T) {
+	t.Skip()
 	var tpl TemplateRecord
 	ip := net.ParseIP("127.0.0.1")
 	mCache := GetCache("cache.file")

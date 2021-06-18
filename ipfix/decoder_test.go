@@ -179,7 +179,6 @@ func BenchmarkDecodeOptsTemplate(b *testing.B) {
 }
 
 func TestMultiMessage(t *testing.T) {
-	t.Skip()
 	ip := net.ParseIP("127.0.0.1")
 	mCache := GetCache("cache.file")
 	d := NewDecoder(ip, multiMessage)

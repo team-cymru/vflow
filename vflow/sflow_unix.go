@@ -25,7 +25,7 @@ package main
 import (
 	"net"
 
-	"github.com/VerizonDigital/vflow/mirror"
+	"github.com/team-cymru/vflow/mirror"
 )
 
 func mirrorSFlowDispatcher(ch chan SFUDPMsg) {

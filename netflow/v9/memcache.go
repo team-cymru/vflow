@@ -89,6 +89,7 @@ func (m MemCache) getShard(templateId uint16, addr net.IP, srcId uint32) (*Templ
 	key = append(key, addr...)
 	key = append(key, sId...)
 	key = append(key, tID...)
+	hash.Write(key)
 	hSum32 := hash.Sum32()
 
 	return m[uint(hSum32)%uint(shardNo)], hSum32

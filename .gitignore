@@ -10,3 +10,5 @@ vflow/vflow
 *.iml
 *.iws
 *~
+
+vendor

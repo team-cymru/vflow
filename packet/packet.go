@@ -103,6 +103,9 @@ func (p *Packet) decodeEthernetHeader() error {
 
 		err = p.decodeNextLayer()
 		if err != nil {
+			if errors.Is(err, errUnknownTransportLayer) {
+				return nil
+			}
 			return err
 		}
 
@@ -115,6 +118,9 @@ func (p *Packet) decodeEthernetHeader() error {
 
 		err = p.decodeNextLayer()
 		if err != nil {
+			if errors.Is(err, errUnknownTransportLayer) {
+				return nil
+			}
 			return err
 		}
 

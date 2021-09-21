@@ -70,9 +70,6 @@ const (
 	// IANAProtoUDP is IANA User Datagram number
 	IANAProtoUDP = 17
 
-	// IANAProtoGRE is IANA Generic Routing Encapsulation
-	IANAProtoGRE = 47
-
 	// IANAProtoIPv6ICMP is IANA Internet Control Message number for IPv6
 	IANAProtoIPv6ICMP = 58
 )
@@ -126,8 +123,6 @@ func (p *Packet) decodeNextLayer() error {
 
 		p.L4 = udp
 		len = 8
-	case IANAProtoGRE:
-		// GRE doesn't have any content we care about right now
 	default:
 		return errUnknownTransportLayer
 	}

@@ -415,17 +415,13 @@ func TestDecodeSampleHeaderExpanded(t *testing.T) {
 		t.Error("expected samples## 5, got", len(datagram.Samples))
 	}
 
-	sample := datagram.Samples[0].(*FlowSampleExpanded)
+	sample := datagram.Samples[0].(*FlowSample)
 
 	if sample.SequenceNo != 17733427 {
 		t.Error("expected SequenceNo 0xa65cc8eb, got", sample.SequenceNo)
 	}
 
-	if sample.SourceIDType != 0 {
-		t.Error("expected SourceID 0, got", sample.SourceID)
-	}
-
-	if sample.SourceID != 436227072 {
+	if sample.SourceID != 0 {
 		t.Error("expected SourceID 0, got", sample.SourceID)
 	}
 
@@ -441,16 +437,8 @@ func TestDecodeSampleHeaderExpanded(t *testing.T) {
 		t.Error("expected Drops 0, got", sample.Drops)
 	}
 
-	if sample.InputFormat != 0 {
-		t.Error("expected Input 0x231, got", sample.Input)
-	}
-
 	if sample.Input != 436213248 {
 		t.Error("expected Input 0x231, got", sample.Input)
-	}
-
-	if sample.OutputFormat != 0 {
-		t.Error("expected Output 0x2c3, got", sample.Output)
 	}
 
 	if sample.Output != 436227072 {

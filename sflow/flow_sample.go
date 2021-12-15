@@ -136,18 +136,6 @@ func (fs *FlowSample) unmarshal(r io.ReadSeeker) error {
 	return err
 }
 
-//SequenceNo   uint32 // Incremented with each flow sample
-//SourceIDType uint32 // sfSourceIDType
-//SourceID     uint32 // sfSourceID
-//SamplingRate uint32 // sfPacketSamplingRate
-//SamplePool   uint32 // Total number of packets that could have been sampled
-//Drops        uint32 // Number of times a packet was dropped due to lack of resources
-//InputFormat  uint32 // SNMP ifFormat of input interface
-//Input        uint32 // SNMP ifIndex of input interface
-//OutputFormat uint32 // SNMP ifFormat of input interface
-//Output       uint32 // SNMP ifIndex of input interface
-//RecordsNo    uint32 // Number of records to follow
-//Records      map[string]Record
 func (fs *FlowSampleExpanded) unmarshal(r io.ReadSeeker) error {
 	var err error
 
@@ -194,6 +182,20 @@ func (fs *FlowSampleExpanded) unmarshal(r io.ReadSeeker) error {
 	err = read(r, &fs.RecordsNo)
 
 	return err
+}
+
+func (fs *FlowSampleExpanded) ToFlowSample() *FlowSample {
+	return &FlowSample{
+		SequenceNo:   fs.SequenceNo,
+		SourceID:     uint8(fs.SourceID),
+		SamplingRate: fs.SamplingRate,
+		SamplePool:   fs.SamplePool,
+		Drops:        fs.Drops,
+		Input:        fs.Input,
+		Output:       fs.Output,
+		RecordsNo:    fs.RecordsNo,
+		Records:      fs.Records,
+	}
 }
 
 func (sh *SampledHeader) unmarshal(r io.Reader) error {
@@ -324,7 +326,7 @@ func decodeFlowSample(r io.ReadSeeker) (*FlowSample, error) {
 	return fs, nil
 }
 
-func decodeFlowSampleExpanded(r io.ReadSeeker) (*FlowSampleExpanded, error) {
+func decodeFlowSampleExpanded(r io.ReadSeeker) (*FlowSample, error) {
 	var (
 		fs          = new(FlowSampleExpanded)
 		rTypeFormat uint32
@@ -350,20 +352,20 @@ func decodeFlowSampleExpanded(r io.ReadSeeker) (*FlowSampleExpanded, error) {
 		case SFDataRawHeader:
 			d, err := decodeSampledHeader(r)
 			if err != nil {
-				return fs, err
+				return fs.ToFlowSample(), err
 			}
 			fs.Records["RawHeader"] = d
 		case SFDataExtSwitch:
 			d, err := decodeExtSwitchData(r)
 			if err != nil {
-				return fs, err
+				return fs.ToFlowSample(), err
 			}
 
 			fs.Records["ExtSwitch"] = d
 		case SFDataExtRouter:
 			d, err := decodeExtRouterData(r, rTypeLength)
 			if err != nil {
-				return fs, err
+				return fs.ToFlowSample(), err
 			}
 
 			fs.Records["ExtRouter"] = d
@@ -372,7 +374,7 @@ func decodeFlowSampleExpanded(r io.ReadSeeker) (*FlowSampleExpanded, error) {
 		}
 	}
 
-	return fs, nil
+	return fs.ToFlowSample(), nil
 }
 
 func decodeSampledHeader(r io.Reader) (*packet.Packet, error) {

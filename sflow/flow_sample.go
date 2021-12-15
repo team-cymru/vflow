@@ -54,6 +54,22 @@ type FlowSample struct {
 	Records      map[string]Record
 }
 
+// FlowSampleExpanded represents single flow sample
+type FlowSampleExpanded struct {
+	SequenceNo   uint32 // Incremented with each flow sample
+	SourceIDType uint32 // sfSourceIDType
+	SourceID     uint32 // sfSourceID
+	SamplingRate uint32 // sfPacketSamplingRate
+	SamplePool   uint32 // Total number of packets that could have been sampled
+	Drops        uint32 // Number of times a packet was dropped due to lack of resources
+	InputFormat  uint32 // SNMP ifFormat of input interface
+	Input        uint32 // SNMP ifIndex of input interface
+	OutputFormat uint32 // SNMP ifFormat of input interface
+	Output       uint32 // SNMP ifIndex of input interface
+	RecordsNo    uint32 // Number of records to follow
+	Records      map[string]Record
+}
+
 // SampledHeader represents sampled header
 type SampledHeader struct {
 	Protocol     uint32 // (enum SFLHeader_protocol)
@@ -108,6 +124,66 @@ func (fs *FlowSample) unmarshal(r io.ReadSeeker) error {
 	}
 
 	if err = read(r, &fs.Input); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.Output); err != nil {
+		return err
+	}
+
+	err = read(r, &fs.RecordsNo)
+
+	return err
+}
+
+//SequenceNo   uint32 // Incremented with each flow sample
+//SourceIDType uint32 // sfSourceIDType
+//SourceID     uint32 // sfSourceID
+//SamplingRate uint32 // sfPacketSamplingRate
+//SamplePool   uint32 // Total number of packets that could have been sampled
+//Drops        uint32 // Number of times a packet was dropped due to lack of resources
+//InputFormat  uint32 // SNMP ifFormat of input interface
+//Input        uint32 // SNMP ifIndex of input interface
+//OutputFormat uint32 // SNMP ifFormat of input interface
+//Output       uint32 // SNMP ifIndex of input interface
+//RecordsNo    uint32 // Number of records to follow
+//Records      map[string]Record
+func (fs *FlowSampleExpanded) unmarshal(r io.ReadSeeker) error {
+	var err error
+
+	if err = read(r, &fs.SequenceNo); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.SourceIDType); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.SourceID); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.SamplingRate); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.SamplePool); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.Drops); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.InputFormat); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.Input); err != nil {
+		return err
+	}
+
+	if err = read(r, &fs.OutputFormat); err != nil {
 		return err
 	}
 
@@ -200,6 +276,57 @@ func (er *ExtRouterData) unmarshal(r io.Reader, l uint32) error {
 func decodeFlowSample(r io.ReadSeeker) (*FlowSample, error) {
 	var (
 		fs          = new(FlowSample)
+		rTypeFormat uint32
+		rTypeLength uint32
+		err         error
+	)
+
+	if err = fs.unmarshal(r); err != nil {
+		return nil, err
+	}
+
+	fs.Records = make(map[string]Record)
+
+	for i := uint32(0); i < fs.RecordsNo; i++ {
+		if err = read(r, &rTypeFormat); err != nil {
+			return nil, err
+		}
+		if err = read(r, &rTypeLength); err != nil {
+			return nil, err
+		}
+
+		switch rTypeFormat {
+		case SFDataRawHeader:
+			d, err := decodeSampledHeader(r)
+			if err != nil {
+				return fs, err
+			}
+			fs.Records["RawHeader"] = d
+		case SFDataExtSwitch:
+			d, err := decodeExtSwitchData(r)
+			if err != nil {
+				return fs, err
+			}
+
+			fs.Records["ExtSwitch"] = d
+		case SFDataExtRouter:
+			d, err := decodeExtRouterData(r, rTypeLength)
+			if err != nil {
+				return fs, err
+			}
+
+			fs.Records["ExtRouter"] = d
+		default:
+			r.Seek(int64(rTypeLength), 1)
+		}
+	}
+
+	return fs, nil
+}
+
+func decodeFlowSampleExpanded(r io.ReadSeeker) (*FlowSampleExpanded, error) {
+	var (
+		fs          = new(FlowSampleExpanded)
 		rTypeFormat uint32
 		rTypeLength uint32
 		err         error

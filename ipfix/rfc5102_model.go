@@ -219,6 +219,7 @@ var InfoModel = IANAInfoModel{
 	ElementKey{0, 61}:  InfoElementEntry{FieldID: 61, Name: "flowDirection", Type: FieldTypes["unsigned8"]},
 	ElementKey{0, 62}:  InfoElementEntry{FieldID: 62, Name: "ipNextHopIPv6Address", Type: FieldTypes["ipv6Address"]},
 	ElementKey{0, 63}:  InfoElementEntry{FieldID: 63, Name: "bgpNextHopIPv6Address", Type: FieldTypes["ipv6Address"]},
+	ElementKey{0, 64}:  InfoElementEntry{FieldID: 64, Name: "ipv6ExtensionHeaders", Type: FieldTypes["unsigned32"]},
 	ElementKey{0, 65}:  InfoElementEntry{FieldID: 65, Name: "vendorProprietary", Type: FieldTypes["unsigned16"]},
 	ElementKey{0, 66}:  InfoElementEntry{FieldID: 66, Name: "vendorProprietary", Type: FieldTypes["unsigned32"]},
 	ElementKey{0, 70}:  InfoElementEntry{FieldID: 70, Name: "mplsTopLabelStackSection", Type: FieldTypes["octetArray"]},
